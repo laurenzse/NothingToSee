@@ -33,7 +33,7 @@ const SerenePlayer = () =>  {
         return () => {
             document.removeEventListener('click', handleClick, { capture: true });
         };
-    }, []);
+    });
 
     return (
         <div>
