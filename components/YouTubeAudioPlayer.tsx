@@ -3,10 +3,11 @@ import { useEffect, useRef } from "react";
 
 interface YouTubeAudioPlayerProps {
   videoId: string;
+  onReady: (ready: boolean) => void;
   isPlaying: boolean
 }
 
-const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({videoId, isPlaying}) => {
+const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({videoId, onReady, isPlaying}) => {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   /**
@@ -157,6 +158,22 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({videoId, isPlayi
     }
 
   }, [isPlaying]);
+
+  useEffect(() => {
+    const handleCanPlay = () => {
+      // Invoke the callback with the readiness information
+      onReady(true);
+    };
+
+    // @ts-ignore
+    audioRef.current.addEventListener('canplay', handleCanPlay);
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      // @ts-ignore
+      audioRef.current.removeEventListener('canplay', handleCanPlay);
+    };
+  }, [onReady]);
 
   return (
     <div>

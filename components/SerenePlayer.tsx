@@ -5,12 +5,17 @@ import LoadingDots from "@/components/LoadingDots";
 const SerenePlayer = () =>  {
     const [isVisible, setIsVisible] = useState(true);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const videoId = "3r_Z5AYJJd4";
 
     const handleClick = () => {
         setIsVisible(false);
         setIsPlaying(true);
     };
+
+    const onReady = () => {
+        setIsLoading(false);
+    }
 
     return (
         <div>
@@ -19,8 +24,10 @@ const SerenePlayer = () =>  {
                     Click Me
                 </button>
             )}
-            <LoadingDots/>
-            <YouTubeAudioPlayer videoId={videoId} isPlaying={isPlaying}/>
+            {isLoading && (
+                <LoadingDots/>
+            )}
+            <YouTubeAudioPlayer videoId={videoId}  onReady={onReady} isPlaying={isPlaying}/>
         </div>
     );
 
