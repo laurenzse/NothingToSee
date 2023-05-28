@@ -7,7 +7,6 @@ interface YouTubeAudioPlayerProps {
 }
 
 const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({videoId, isPlaying}) => {
-  const previousVideoId = useRef<string>("");
   const audioRef = useRef<HTMLAudioElement>(null);
 
   /**
@@ -146,19 +145,18 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({videoId, isPlayi
       }
     };
 
-    // Check if videoId has changed
-    if (videoId !== previousVideoId.current) {
-      fetchData();
-      previousVideoId.current = videoId;
-    }
+    fetchData();
 
+  }, [videoId]);
+
+  useEffect(() => {
     if (isPlaying) {
       playAudio();
     } else {
       pauseAudio()
     }
 
-  }, [videoId, isPlaying]);
+  }, [isPlaying]);
 
   return (
     <div>
