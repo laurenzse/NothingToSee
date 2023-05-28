@@ -1,0 +1,15 @@
+.loading-dots {
+    font-family: monospace; /* Use a monospace font */
+    font-size: 2rem; /* Responsive font size */
+    display: inline-block;
+    width: 3rem; /* Reserve the same space for three dots */
+    height: 1rem; /* Set the height to match the font size */
+    white-space:pre; /* render whitespace */
+}
+
+@media (max-width: 768px) {
+    /* Responsive font size for mobile devices */
+    .loading-dots {
+        font-size: 1.5rem;
+    }
+}

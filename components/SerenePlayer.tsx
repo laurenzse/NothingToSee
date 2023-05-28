@@ -1,6 +1,7 @@
 "use client";
 import YouTubeAudioPlayer from "../components/YouTubeAudioPlayer";
 import {useState} from "react";
+import LoadingDots from "@/components/LoadingDots";
 const SerenePlayer = () =>  {
     const [isVisible, setIsVisible] = useState(true);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -18,6 +19,7 @@ const SerenePlayer = () =>  {
                     Click Me
                 </button>
             )}
+            <LoadingDots/>
             <YouTubeAudioPlayer videoId={videoId} isPlaying={isPlaying}/>
         </div>
     );
