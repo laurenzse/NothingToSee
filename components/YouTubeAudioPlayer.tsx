@@ -3,11 +3,13 @@ import { useEffect, useRef } from "react";
 
 interface YouTubeAudioPlayerProps {
   videoId: string;
-  onReady: (ready: boolean) => void;
+  onReady: () => void;
+  onWaiting: () => void;
+  onResumed: () => void;
   isPlaying: boolean
 }
 
-const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({videoId, onReady, isPlaying}) => {
+const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({videoId, onReady,  onWaiting,  onResumed, isPlaying}) => {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   /**
@@ -162,22 +164,40 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({videoId, onReady
   useEffect(() => {
     const handleCanPlay = () => {
       // Invoke the callback with the readiness information
-      onReady(true);
+      onReady();
+    };
+
+    const handleWaiting = () => {
+      // Invoke the callback with the readiness information
+      onWaiting();
+    };
+
+    const handleResumed = () => {
+      // Invoke the callback with the readiness information
+      onResumed();
     };
 
     // @ts-ignore
     audioRef.current.addEventListener('canplay', handleCanPlay);
+    // @ts-ignore
+    audioRef.current.addEventListener('waiting', handleWaiting);
+    // @ts-ignore
+    audioRef.current.addEventListener('playing', handleResumed);
 
     // Clean up the event listener when the component unmounts
     return () => {
       // @ts-ignore
       audioRef.current.removeEventListener('canplay', handleCanPlay);
+      // @ts-ignore
+      audioRef.current.removeEventListener('waiting', handleWaiting);
+      // @ts-ignore
+      audioRef.current.removeEventListener('playing', handleResumed);
     };
-  }, [onReady]);
+  }, [onReady, onWaiting, onResumed]);
 
   return (
     <div>
-      <audio ref={audioRef} id="youtube" controls />
+      <audio ref={audioRef} id="youtube" />
     </div>
   );
 };
