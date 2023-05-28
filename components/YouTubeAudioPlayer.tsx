@@ -1,7 +1,13 @@
 "use client";
 import { useEffect, useRef } from "react";
 
-const YouTubeAudioPlayer = ({ videoId }: { videoId: string }) => {
+interface YouTubeAudioPlayerProps {
+  videoId: string;
+  isPlaying: boolean
+}
+
+const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({videoId, isPlaying}) => {
+  const previousVideoId = useRef<string>("");
   const audioRef = useRef<HTMLAudioElement>(null);
 
   /**
@@ -103,16 +109,29 @@ const YouTubeAudioPlayer = ({ videoId }: { videoId: string }) => {
     return undefined;
   };
 
-  const setAudioSourceAndPlay = (audioSource: string | undefined) => {
+  const setAudioSource = (audioSource: string | undefined) => {
     if (audioSource) {
       // @ts-ignore
       audioRef.current.src = audioSource;
-      // @ts-ignore
-      audioRef.current.play();
     } else {
       console.error("Failed to find a suitable audio source.");
     }
   };
+
+  const playAudio = () => {
+    // @ts-ignore
+    if (audioRef.current.src) {
+      // @ts-ignore
+      audioRef.current.play();
+    } else {
+      console.error("Audio source not set.");
+    }
+  }
+
+  const pauseAudio = () => {
+    // @ts-ignore
+    audioRef.current.pause();
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -121,14 +140,25 @@ const YouTubeAudioPlayer = ({ videoId }: { videoId: string }) => {
         const parsedData = extractYouTubeData(data);
         const streams = getAudioStreams(parsedData);
         const audioSource = selectAudioSource(streams);
-        setAudioSourceAndPlay(audioSource);
+        setAudioSource(audioSource);
       } catch (error) {
         console.error("Failed to fetch YouTube video data:", error);
       }
     };
 
-    fetchData();
-  }, [videoId]);
+    // Check if videoId has changed
+    if (videoId !== previousVideoId.current) {
+      fetchData();
+      previousVideoId.current = videoId;
+    }
+
+    if (isPlaying) {
+      playAudio();
+    } else {
+      pauseAudio()
+    }
+
+  }, [videoId, isPlaying]);
 
   return (
     <div>
