@@ -8,7 +8,7 @@ const LoadingDots: React.FC = () => {
         // Increment the dotState every 500 milliseconds
         const interval = setInterval(() => {
             setDotState((prevState) => (prevState + 1) % 6); // Cycle through states 0 to 5
-        }, 500);
+        }, 1000);
 
         // Cleanup the interval when the component is unmounted
         return () => {
