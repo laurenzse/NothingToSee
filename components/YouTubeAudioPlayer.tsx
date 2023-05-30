@@ -6,10 +6,16 @@ interface YouTubeAudioPlayerProps {
   onReady: () => void;
   onWaiting: () => void;
   onResumed: () => void;
-  isPlaying: boolean
+  isPlaying: boolean;
 }
 
-const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({videoId, onReady,  onWaiting,  onResumed, isPlaying}) => {
+const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
+  videoId,
+  onReady,
+  onWaiting,
+  onResumed,
+  isPlaying,
+}) => {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   /**
@@ -128,12 +134,12 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({videoId, onReady
     } else {
       console.error("Audio source not set.");
     }
-  }
+  };
 
   const pauseAudio = () => {
     // @ts-ignore
     audioRef.current.pause();
-  }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -149,16 +155,14 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({videoId, onReady
     };
 
     fetchData();
-
   }, [videoId]);
 
   useEffect(() => {
     if (isPlaying) {
       playAudio();
     } else {
-      pauseAudio()
+      pauseAudio();
     }
-
   }, [isPlaying]);
 
   useEffect(() => {
@@ -178,26 +182,28 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({videoId, onReady
     };
 
     // @ts-ignore
-    audioRef.current.addEventListener('canplay', handleCanPlay);
+    audioRef.current.addEventListener("canplay", handleCanPlay);
     // @ts-ignore
-    audioRef.current.addEventListener('waiting', handleWaiting);
+    audioRef.current.addEventListener("waiting", handleWaiting);
     // @ts-ignore
-    audioRef.current.addEventListener('playing', handleResumed);
+    audioRef.current.addEventListener("playing", handleResumed);
 
     // Clean up the event listener when the component unmounts
     return () => {
-      // @ts-ignore
-      audioRef.current.removeEventListener('canplay', handleCanPlay);
-      // @ts-ignore
-      audioRef.current.removeEventListener('waiting', handleWaiting);
-      // @ts-ignore
-      audioRef.current.removeEventListener('playing', handleResumed);
+      if (audioRef.current) {
+        // @ts-ignore
+        audioRef.current.removeEventListener("canplay", handleCanPlay);
+        // @ts-ignore
+        audioRef.current.removeEventListener("waiting", handleWaiting);
+        // @ts-ignore
+        audioRef.current.removeEventListener("playing", handleResumed);
+      }
     };
   }, [onReady, onWaiting, onResumed]);
 
   return (
     <div>
-      <audio ref={audioRef} id="youtube" />
+      <audio ref={audioRef} id="youtube" controls />
     </div>
   );
 };
