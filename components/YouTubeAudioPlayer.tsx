@@ -238,7 +238,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
 
   return (
     <div>
-      <audio ref={audioRef} id="youtube" controls />
+      <audio ref={audioRef} id="youtube" />
     </div>
   );
 };
