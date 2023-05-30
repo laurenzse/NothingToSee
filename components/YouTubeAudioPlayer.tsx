@@ -7,6 +7,7 @@ interface YouTubeAudioPlayerProps {
   onReady: () => void;
   onWaiting: () => void;
   onResumed: () => void;
+  startAt?: number;
   isPlaying: boolean;
 }
 
@@ -15,6 +16,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
   onReady,
   onWaiting,
   onResumed,
+  startAt = 0,
   isPlaying,
 }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -122,6 +124,8 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
     if (audioSource) {
       // @ts-ignore
       audioRef.current.src = audioSource;
+      // @ts-ignore
+      audioRef.current.currentTime = startAt;
     } else {
       console.error("Failed to find a suitable audio source.");
     }

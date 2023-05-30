@@ -61,6 +61,7 @@ const SerenePlayer = () => {
           onReady={onReady}
           onWaiting={onWaiting}
           onResumed={onResumedPlaying}
+          startAt={3}
           isPlaying={isPlaying}
         />
       )}
