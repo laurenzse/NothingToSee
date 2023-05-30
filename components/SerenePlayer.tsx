@@ -35,7 +35,7 @@ const SerenePlayer = () => {
     return () => {
       document.removeEventListener("click", handleClick, { capture: true });
     };
-  }, []);
+  });
 
   useEffect(() => {
     const setYouTubeURL = async () => {
