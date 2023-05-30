@@ -23,6 +23,7 @@ const SerenePlayer = () => {
   };
 
   const handleClick = (event: MouseEvent) => {
+    // TODO handle set playing correctly when media is loading
     setIsPlaying(!isPlaying);
   };
 
