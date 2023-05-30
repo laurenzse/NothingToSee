@@ -142,39 +142,39 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
     audioRef.current.pause();
   };
 
-  useEffect(() => {
-    const onVideoProgressUpdate = (e: any) => {
-      const player = audioRef.current as HTMLAudioElement;
-      var percentageBuffered = 0;
-
-      if (
-        player.buffered.length > 0 &&
-        player.buffered.end &&
-        player.duration
-      ) {
-        percentageBuffered = player.buffered.end(0) / player.duration;
-      }
-
-      console.log(percentageBuffered);
-    };
-
-    const onVideoStalled = (e: any) => {
-      const player = audioRef.current as HTMLAudioElement;
-      player.load();
-
-      console.log("aaaaaa");
-
-      // Threw in these two lines for good measure.
-      player.play();
-      player.pause();
-    };
-
-    // @ts-ignore
-    audioRef.current.addEventListener("progress", onVideoProgressUpdate, false);
-
-    // @ts-ignore
-    audioRef.current.addEventListener("stalled", onVideoStalled, false);
-  });
+  // useEffect(() => {
+  //   const onVideoProgressUpdate = (e: any) => {
+  //     const player = audioRef.current as HTMLAudioElement;
+  //     var percentageBuffered = 0;
+  //
+  //     if (
+  //       player.buffered.length > 0 &&
+  //       player.buffered.end &&
+  //       player.duration
+  //     ) {
+  //       percentageBuffered = player.buffered.end(0) / player.duration;
+  //     }
+  //
+  //     console.log(percentageBuffered);
+  //   };
+  //
+  //   const onVideoStalled = (e: any) => {
+  //     const player = audioRef.current as HTMLAudioElement;
+  //     player.load();
+  //
+  //     console.log("aaaaaa");
+  //
+  //     // Threw in these two lines for good measure.
+  //     player.play();
+  //     player.pause();
+  //   };
+  //
+  //   // @ts-ignore
+  //   audioRef.current.addEventListener("progress", onVideoProgressUpdate, false);
+  //
+  //   // @ts-ignore
+  //   audioRef.current.addEventListener("stalled", onVideoStalled, false);
+  // });
 
   useEffect(() => {
     const fetchData = async () => {
