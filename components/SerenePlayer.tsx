@@ -31,8 +31,6 @@ const SerenePlayer = () => {
     // to handle the click event only if it has not been processed by other components
     document.addEventListener("click", handleClick, { capture: true });
 
-    console.log(getSoundscapeLink());
-
     // Clean up the event listener when the component unmounts
     return () => {
       document.removeEventListener("click", handleClick, { capture: true });
