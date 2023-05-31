@@ -12,11 +12,11 @@
 }
 
 .upper-section {
-    margin-bottom: -25%; /* Adjust the margin as needed to move the upper element down */
+    margin-bottom: -25%;
 }
 
 .lower-section {
-    margin-top: -25%; /* Adjust the margin as needed to move the lower element up */
+    margin-top: -25%;
 }
 
 .centered-element {
