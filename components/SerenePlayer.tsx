@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import LoadingDots from "@/components/LoadingDots";
 import { getSoundscapeLink } from "../lib/soundscapes";
 import { getYouTubeIdFromURL } from "../lib/youtube_utils";
-import MuteIcon from "../public/mute_icon.svg";
+import MuteIcon from "../components/mute_icon";
 import "../styles/split-layout.css";
 import "../styles/global.css";
 
@@ -63,13 +63,7 @@ const SerenePlayer = () => {
       <div className="section upper-section">
         {!isPlaying && (
           <div className="centered-element">
-            <Image
-              src={MuteIcon}
-              alt="Mute"
-              className="mute-icon"
-              height={75}
-              width={75}
-            />
+            <MuteIcon className="mute-icon" />
           </div>
         )}
       </div>
