@@ -1,10 +1,13 @@
 "use client";
+import Image from "next/image";
 import YouTubeAudioPlayer from "../components/youtube_audio_player";
 import { useState, useEffect } from "react";
 import LoadingDots from "@/components/LoadingDots";
 import { getSoundscapeLink } from "../lib/soundscapes";
 import { getYouTubeIdFromURL } from "../lib/youtube_utils";
+import MuteIcon from "../public/mute_icon.svg";
 import "../styles/split-layout.css";
+import "../styles/global.css";
 
 const SerenePlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -58,10 +61,20 @@ const SerenePlayer = () => {
   return (
     <div className="split-layout">
       <div className="section upper-section">
-        {!isPlaying && <div className="centered-element">Muted</div>}
+        {!isPlaying && (
+          <div className="centered-element">
+            <Image
+              src={MuteIcon}
+              alt="Mute"
+              className="mute-icon"
+              height={75}
+              width={75}
+            />
+          </div>
+        )}
       </div>
       <div className="section lower-section">
-        {isLoading && (
+        {(isLoading || true) && (
           <div className="centered-element">
             <LoadingDots />
           </div>
