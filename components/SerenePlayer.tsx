@@ -1,5 +1,5 @@
 "use client";
-import YouTubeAudioPlayer from "../components/YouTubeAudioPlayer";
+import YouTubeAudioPlayer from "../components/youtube_audio_player";
 import { useState, useEffect } from "react";
 import LoadingDots from "@/components/LoadingDots";
 import { getSoundscapeLink } from "../lib/soundscapes";
