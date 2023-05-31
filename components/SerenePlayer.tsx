@@ -74,7 +74,7 @@ const SerenePlayer = () => {
         )}
       </div>
       <div className="section lower-section">
-        {(isLoading || true) && (
+        {isLoading && (
           <div className="centered-element">
             <LoadingDots />
           </div>
