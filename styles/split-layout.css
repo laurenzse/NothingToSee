@@ -1,0 +1,24 @@
+.split-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.section {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.upper-section {
+    margin-bottom: -20%; /* Adjust the margin as needed to move the upper element down */
+}
+
+.lower-section {
+    margin-top: -20%; /* Adjust the margin as needed to move the lower element up */
+}
+
+.centered-element {
+    text-align: center;
+}

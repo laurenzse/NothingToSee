@@ -110,7 +110,11 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
 
   useEffect(() => {
     const handleCanPlay = () => {
-      onReady(playerRef.current as Player);
+      const player = playerRef.current;
+
+      if (player) {
+        onReady(player);
+      }
     };
 
     const handleWaiting = () => {
@@ -141,6 +145,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
       const player = playerRef.current;
 
       if (player) {
+        player.off("ready", handleCanPlay);
         player.off("canplay", handleCanPlay);
         player.off("waiting", handleWaiting);
         player.off("playing", handleResumed);

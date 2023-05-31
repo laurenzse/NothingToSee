@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import LoadingDots from "@/components/LoadingDots";
 import { getSoundscapeLink } from "../lib/soundscapes";
 import { getYouTubeIdFromURL } from "../lib/youtube_utils";
+import "../styles/split-layout.css";
 
 const SerenePlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -55,9 +56,17 @@ const SerenePlayer = () => {
   }, []);
 
   return (
-    <div>
-      {!isPlaying && "Muted"}
-      {isLoading && <LoadingDots />}
+    <div className="split-layout">
+      <div className="section upper-section">
+        {!isPlaying && <div className="centered-element">Muted</div>}
+      </div>
+      <div className="section lower-section">
+        {isLoading && (
+          <div className="centered-element">
+            <LoadingDots />
+          </div>
+        )}
+      </div>
       {youTubeId && (
         <YouTubeAudioPlayer
           videoId={youTubeId}
