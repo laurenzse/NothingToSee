@@ -30,7 +30,7 @@ export async function getCurrentDayTime() {
   try {
     sunTimes = await getSunTimes();
   } catch (error) {
-    console.error("Could not fetch sun sun times: ", error);
+    console.error("Could not fetch sun times: ", error);
     return DayTime.Day;
   }
 
