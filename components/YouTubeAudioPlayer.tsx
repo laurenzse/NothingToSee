@@ -4,8 +4,6 @@ import Player from "video.js/dist/types/player";
 import "videojs-youtube";
 import "video.js/dist/video-js.css";
 
-interface Props {}
-
 interface YouTubeAudioPlayerProps {
   youtubeURL: string;
   onReady: () => void;
@@ -33,6 +31,14 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
   const playerRef = useRef<Player | null>(null);
   const [hasWaitedInitially, setWaitedInitially] = useState(false);
 
+  const updatePlayingState = () => {
+    if (isPlaying) {
+      playAudio();
+    } else {
+      pauseAudio();
+    }
+  };
+
   useEffect(() => {
     // Make sure Video.js player is only initialized once
     if (!playerRef.current) {
@@ -44,7 +50,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
       if (audioRef.current) {
         audioRef.current.appendChild(audioElement);
 
-        const player = (playerRef.current = videojs(
+        playerRef.current = videojs(
           audioElement,
           {
             controls: false, // Disable control elements
@@ -55,10 +61,10 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
           () => {
             updatePlayingState();
           }
-        ));
+        );
       }
     }
-  }, [onReady]);
+  }, [onReady, updatePlayingState]);
 
   // Dispose the Video.js player when the functional component unmounts
   useEffect(() => {
@@ -106,19 +112,11 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
       player.currentTime(startAt);
       updatePlayingState();
     }
-  }, [youtubeURL]);
-
-  const updatePlayingState = () => {
-    if (isPlaying) {
-      playAudio();
-    } else {
-      pauseAudio();
-    }
-  };
+  }, [youtubeURL, startAt, updatePlayingState]);
 
   useEffect(() => {
     updatePlayingState();
-  }, [isPlaying]);
+  }, [isPlaying, updatePlayingState]);
 
   useEffect(() => {
     const handleCanPlay = () => {

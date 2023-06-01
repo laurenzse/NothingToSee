@@ -187,8 +187,8 @@ sup { font-size: 80%; vertical-align: top; }
 }
 
 .hidden {
-    width: 0px;
-    height: 0px;
+    width: 0;
+    height: 0;
 }
 .fill-page {
     height: 100vh;

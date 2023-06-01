@@ -2,7 +2,7 @@
 import YouTubeAudioPlayer from "./YouTubeAudioPlayer";
 import React, { useState, useEffect } from "react";
 import LoadingDots from "@/components/LoadingDots";
-import { getSoundscapeLink } from "../lib/soundscapes";
+import { getSoundscapeLink } from "@/lib/soundscapes";
 import MuteIcon from "./MuteIcon";
 import styles from "../styles/MinimalPlayer.module.css";
 
@@ -46,7 +46,7 @@ const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
     })();
   };
 
-  const handleClick = (event: MouseEvent) => {
+  const handleClick = () => {
     setIsPlaying(!isPlaying);
   };
 
@@ -75,7 +75,7 @@ const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
     chooseNewYouTubeURL();
 
     return () => {};
-  }, []);
+  }, [chooseNewYouTubeURL]);
 
   return (
     <div className="split-layout fill-container">

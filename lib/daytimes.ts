@@ -12,7 +12,7 @@ async function fetchIpInfo(): Promise<any | null> {
     if (response.ok) {
       return response.json();
     } else {
-      throw new Error("Request failed with status " + response.status);
+      console.error("Request failed with status " + response.status);
     }
   } catch (error) {
     console.error("Request failed with status: ", error);
