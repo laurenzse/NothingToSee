@@ -15,17 +15,16 @@ export default function Home() {
         </div>
         <div className={styles.bar}>
           {sourceURL && (
-            <Link
-              href={sourceURL}
-              className={styles.barElement}
-              target="_blank"
-            >
+            <a href={sourceURL} className={styles.barElement} target="_blank">
               Playing from...
-            </Link>
+            </a>
           )}
-          <Link href={"adsadfsdf.de"} className={styles.barElement}>
-            Imprint
-          </Link>
+          <a
+            href={"mailto:laurenzseidel@yahoo.de"}
+            className={styles.barElement}
+          >
+            Contact
+          </a>
         </div>
       </div>
     </div>
