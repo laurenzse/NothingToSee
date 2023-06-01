@@ -4,7 +4,6 @@ import YouTubeAudioPlayer from "../components/youtube_audio_player";
 import { useState, useEffect } from "react";
 import LoadingDots from "@/components/LoadingDots";
 import { getSoundscapeLink } from "../lib/soundscapes";
-import { getYouTubeIdFromURL } from "../lib/youtube_utils";
 import MuteIcon from "../components/mute_icon";
 import "../styles/split-layout.css";
 import "../styles/global.css";
@@ -12,7 +11,7 @@ import "../styles/global.css";
 const SerenePlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [youTubeId, setYouTubeId] = useState<string>();
+  const [youTubeURL, setYouTubeURL] = useState<string>();
 
   const onReady = () => {
     setIsLoading(false);
@@ -51,17 +50,16 @@ const SerenePlayer = () => {
   });
 
   useEffect(() => {
-    const setYouTubeURL = async () => {
+    const chooseYouTubeURL = async () => {
       try {
-        const youtube_url = await getSoundscapeLink();
-        const youtube_id = getYouTubeIdFromURL(youtube_url);
-        setYouTubeId(youtube_id);
+        const youTubeURL = await getSoundscapeLink();
+        setYouTubeURL(youTubeURL);
       } catch (error) {
         console.error("Failed to fetch YouTube video data:", error);
       }
     };
 
-    setYouTubeURL();
+    chooseYouTubeURL();
 
     return () => {};
   }, []);
@@ -82,9 +80,9 @@ const SerenePlayer = () => {
           </div>
         )}
       </div>
-      {youTubeId && (
+      {youTubeURL && (
         <YouTubeAudioPlayer
-          videoId={youTubeId}
+          youtubeURL={youTubeURL}
           onReady={onReady}
           onWaiting={onWaiting}
           onResumed={onResumedPlaying}

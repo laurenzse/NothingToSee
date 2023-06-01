@@ -8,7 +8,7 @@ import "../styles/global.css";
 interface Props {}
 
 interface YouTubeAudioPlayerProps {
-  videoId: string;
+  youtubeURL: string;
   onReady: () => void;
   onWaiting: () => void;
   onResumed: () => void;
@@ -19,7 +19,7 @@ interface YouTubeAudioPlayerProps {
 }
 
 const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
-  videoId,
+  youtubeURL,
   onReady,
   onWaiting,
   onResumed,
@@ -97,14 +97,14 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
       const sources = [
         {
           type: "video/youtube", //important
-          src: "https://www.youtube.com/watch?v=" + videoId,
+          src: youtubeURL,
         },
       ];
       player.src(sources);
       player.currentTime(startAt);
       updatePlayingState();
     }
-  }, [videoId]);
+  }, [youtubeURL]);
 
   const updatePlayingState = () => {
     if (isPlaying) {
