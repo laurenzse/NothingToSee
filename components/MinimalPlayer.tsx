@@ -75,7 +75,7 @@ const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
     chooseNewYouTubeURL();
 
     return () => {};
-  }, [chooseNewYouTubeURL]);
+  }, []);
 
   return (
     <div className="split-layout fill-container">

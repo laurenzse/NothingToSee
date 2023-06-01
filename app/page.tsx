@@ -15,7 +15,11 @@ export default function Home() {
         </div>
         <div className={styles.bar}>
           {sourceURL && (
-            <Link href={sourceURL} className={styles.barElement}>
+            <Link
+              href={sourceURL}
+              className={styles.barElement}
+              target="_blank"
+            >
               Playing from...
             </Link>
           )}
