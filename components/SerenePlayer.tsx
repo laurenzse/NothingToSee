@@ -26,6 +26,15 @@ const SerenePlayer = () => {
     setIsLoading(false);
   };
 
+  const onPlay = () => {
+    // if media is state is set from outside, e.g. by media keys, update UI and state accordingly
+    setIsPlaying(true);
+  };
+
+  const onPause = () => {
+    setIsPlaying(false);
+  };
+
   const handleClick = (event: MouseEvent) => {
     // TODO handle set playing correctly when media is loading
     setIsPlaying(!isPlaying);
@@ -80,6 +89,8 @@ const SerenePlayer = () => {
           onReady={onReady}
           onWaiting={onWaiting}
           onResumed={onResumedPlaying}
+          onPlay={onPlay}
+          onPause={onPause}
           startAt={3}
           isPlaying={isPlaying}
         />

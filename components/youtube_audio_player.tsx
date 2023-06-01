@@ -9,9 +9,11 @@ interface Props {}
 
 interface YouTubeAudioPlayerProps {
   videoId: string;
-  onReady: (player: Player) => void;
+  onReady: () => void;
   onWaiting: () => void;
   onResumed: () => void;
+  onPlay: () => void;
+  onPause: () => void;
   startAt?: number;
   isPlaying: boolean;
 }
@@ -21,6 +23,8 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
   onReady,
   onWaiting,
   onResumed,
+  onPlay,
+  onPause,
   startAt = 0,
   isPlaying,
 }) => {
@@ -119,7 +123,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
       const player = playerRef.current;
 
       if (player) {
-        onReady(player);
+        onReady();
       }
     };
 
@@ -137,6 +141,14 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
       onResumed();
     };
 
+    const handlePlay = () => {
+      onPlay();
+    };
+
+    const handlePause = () => {
+      onPause();
+    };
+
     const player = playerRef.current;
 
     if (player) {
@@ -144,6 +156,8 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
       player.on("canplay", handleCanPlay);
       player.on("waiting", handleWaiting);
       player.on("playing", handleResumed);
+      player.on("play", handlePlay);
+      player.on("pause", handlePause);
     }
 
     // Clean up the event listener when the component unmounts
@@ -155,9 +169,11 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
         player.off("canplay", handleCanPlay);
         player.off("waiting", handleWaiting);
         player.off("playing", handleResumed);
+        player.off("play", handlePlay);
+        player.off("pause", handlePause);
       }
     };
-  }, [onReady, onWaiting, onResumed]);
+  }, [onReady, onWaiting, onResumed, onPlay, onPause]);
 
   return (
     <div data-vjs-player className={"hidden"}>
