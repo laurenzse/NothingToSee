@@ -14,6 +14,7 @@ interface YouTubeAudioPlayerProps {
   onResumed: () => void;
   onPlay: () => void;
   onPause: () => void;
+  onEnded: () => void;
   startAt?: number;
   isPlaying: boolean;
 }
@@ -25,6 +26,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
   onResumed,
   onPlay,
   onPause,
+  onEnded,
   startAt = 0,
   isPlaying,
 }) => {
@@ -149,6 +151,10 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
       onPause();
     };
 
+    const handleEnded = () => {
+      onEnded();
+    };
+
     const player = playerRef.current;
 
     if (player) {
@@ -158,6 +164,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
       player.on("playing", handleResumed);
       player.on("play", handlePlay);
       player.on("pause", handlePause);
+      player.on("ended", handleEnded);
     }
 
     // Clean up the event listener when the component unmounts
@@ -171,6 +178,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
         player.off("playing", handleResumed);
         player.off("play", handlePlay);
         player.off("pause", handlePause);
+        player.off("ended", handleEnded);
       }
     };
   }, [onReady, onWaiting, onResumed, onPlay, onPause]);

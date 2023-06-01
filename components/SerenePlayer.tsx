@@ -34,8 +34,22 @@ const SerenePlayer = () => {
     setIsPlaying(false);
   };
 
+  const onEnded = () => {
+    console.log("ended");
+    chooseNewYouTubeURL();
+  };
+
   const handleClick = (event: MouseEvent) => {
     setIsPlaying(!isPlaying);
+  };
+
+  const chooseNewYouTubeURL = async () => {
+    try {
+      const youTubeURL = await getSoundscapeLink();
+      setYouTubeURL(youTubeURL);
+    } catch (error) {
+      console.error("Failed to fetch YouTube video data:", error);
+    }
   };
 
   useEffect(() => {
@@ -50,16 +64,7 @@ const SerenePlayer = () => {
   });
 
   useEffect(() => {
-    const chooseYouTubeURL = async () => {
-      try {
-        const youTubeURL = await getSoundscapeLink();
-        setYouTubeURL(youTubeURL);
-      } catch (error) {
-        console.error("Failed to fetch YouTube video data:", error);
-      }
-    };
-
-    chooseYouTubeURL();
+    chooseNewYouTubeURL();
 
     return () => {};
   }, []);
@@ -88,6 +93,7 @@ const SerenePlayer = () => {
           onResumed={onResumedPlaying}
           onPlay={onPlay}
           onPause={onPause}
+          onEnded={onEnded}
           startAt={3}
           isPlaying={isPlaying}
         />
