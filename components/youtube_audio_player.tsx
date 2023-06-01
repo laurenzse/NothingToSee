@@ -46,7 +46,9 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
             audioOnlyMode: true,
             preload: "auto", // Preload the audio
           },
-          () => {}
+          () => {
+            updatePlayingState();
+          }
         ));
       }
     }
@@ -96,16 +98,20 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
       ];
       player.src(sources);
       player.currentTime(startAt);
-      player.pause();
+      updatePlayingState();
     }
   }, [videoId]);
 
-  useEffect(() => {
+  const updatePlayingState = () => {
     if (isPlaying) {
       playAudio();
     } else {
       pauseAudio();
     }
+  };
+
+  useEffect(() => {
+    updatePlayingState();
   }, [isPlaying]);
 
   useEffect(() => {
