@@ -5,7 +5,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Nothing To See",
-  description: "A web app to enjoy soundscapes minimally.",
+  description: "A web app to enjoy soundscapes without distraction.",
 };
 
 export default function RootLayout({
