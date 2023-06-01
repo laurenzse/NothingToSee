@@ -3,7 +3,7 @@ import videojs from "video.js";
 import Player from "video.js/dist/types/player";
 import "videojs-youtube";
 import "video.js/dist/video-js.css";
-import "../styles/global.css";
+import "../styles/globals.css";
 
 interface Props {}
 

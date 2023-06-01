@@ -1,14 +1,14 @@
 "use client";
 import Image from "next/image";
-import YouTubeAudioPlayer from "../components/youtube_audio_player";
+import YouTubeAudioPlayer from "./YouTubeAudioPlayer";
 import { useState, useEffect } from "react";
 import LoadingDots from "@/components/LoadingDots";
 import { getSoundscapeLink } from "../lib/soundscapes";
-import MuteIcon from "../components/mute_icon";
+import MuteIcon from "./MuteIcon";
 import "../styles/split-layout.css";
-import "../styles/global.css";
+import "../styles/globals.css";
 
-const SerenePlayer = () => {
+const MinimalPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [youTubeURL, setYouTubeURL] = useState<string>();
@@ -107,4 +107,4 @@ const SerenePlayer = () => {
   );
 };
 
-export default SerenePlayer;
+export default MinimalPlayer;

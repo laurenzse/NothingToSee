@@ -1,16 +1,16 @@
 import Image from "next/image";
 import styles from "./page.module.css";
-import SerenePlayer from "../components/SerenePlayer";
-import LinkBar from "../components/link_bar";
+import MinimalPlayer from "../components/MinimalPlayer";
+import LinkBar from "../components/LinkBar";
 import "../styles/split-layout.css";
-import "../styles/global.css";
+import "../styles/globals.css";
 
 export default function Home() {
   return (
     <div>
       <div className="split-layout fill-page">
         <div className="bar-complement">
-          <SerenePlayer />
+          <MinimalPlayer />
 
           {/*<p>Hey hey</p>*/}
         </div>
