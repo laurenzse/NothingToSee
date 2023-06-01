@@ -40,6 +40,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
       // The Video.js player needs to be _inside_ the component el for React 18 Strict Mode.
       const audioElement = document.createElement("audio");
       audioElement.classList.add("video-js");
+      audioElement.classList.add("hidden");
 
       if (audioRef.current) {
         audioRef.current.appendChild(audioElement);
@@ -185,7 +186,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
 
   return (
     <div data-vjs-player className={"hidden"}>
-      <div ref={audioRef} />
+      <div ref={audioRef} className={"hidden"} />
     </div>
   );
 };

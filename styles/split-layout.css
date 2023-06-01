@@ -1,24 +1,54 @@
-.split-layout {
-    display: flex;
-    flex-direction: column;
+.fill-page {
     height: 100vh;
 }
 
-.section {
-    flex: 1;
+.fill-container {
+    height: 100%;
+}
+
+.split-layout {
     display: flex;
+    flex-direction: column;
+}
+
+.section {
+    display: flex;
+    flex: 1;
     justify-content: center;
     align-items: center;
 }
 
-.upper-section {
+.lowered-element {
     margin-bottom: -20%;
 }
 
-.lower-section {
+.raised-element {
     margin-top: -20%;
+}
+
+.bar-complement {
+    flex: 1;
+}
+
+.bar-element {
+    background-color: #e0e0e0;
+    /*overflow-y: auto;*/
 }
 
 .centered-element {
     text-align: center;
+}
+
+.bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Media query for stacking the links when space is limited */
+@media (max-width: 768px) {
+    .bar {
+        flex-direction: column;
+        align-items: center;
+    }
 }

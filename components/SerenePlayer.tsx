@@ -35,8 +35,13 @@ const SerenePlayer = () => {
   };
 
   const onEnded = () => {
-    console.log("ended");
-    chooseNewYouTubeURL();
+    (async () => {
+      try {
+        await chooseNewYouTubeURL();
+      } catch (error) {
+        console.error("Failed to choose YouTube video:", error);
+      }
+    })();
   };
 
   const handleClick = (event: MouseEvent) => {
@@ -70,15 +75,15 @@ const SerenePlayer = () => {
   }, []);
 
   return (
-    <div className="split-layout">
-      <div className="section upper-section">
+    <div className="split-layout fill-container">
+      <div className="section lowered-element">
         {!isPlaying && (
           <div className="centered-element">
             <MuteIcon className="mute-icon" />
           </div>
         )}
       </div>
-      <div className="section lower-section">
+      <div className="section raised-element">
         {isLoading && (
           <div className="centered-element">
             <LoadingDots />
