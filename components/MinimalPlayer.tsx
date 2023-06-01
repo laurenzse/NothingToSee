@@ -61,24 +61,13 @@ const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
   };
 
   useEffect(() => {
-    // Attach the click event listener to the document during the capture phase
-    // to handle the click event only if it has not been processed by other components
-    document.addEventListener("click", handleClick, { capture: true });
-
-    // Clean up the event listener when the component unmounts
-    return () => {
-      document.removeEventListener("click", handleClick, { capture: true });
-    };
-  });
-
-  useEffect(() => {
     chooseNewYouTubeURL();
 
     return () => {};
   }, []);
 
   return (
-    <div className="split-layout fill-container">
+    <div className="split-layout fill-container" onClick={handleClick}>
       <div className={`${styles.section} ${styles.loweredElement}`}>
         {!isPlaying && (
           <div className={`${styles.centeredElement}`}>
