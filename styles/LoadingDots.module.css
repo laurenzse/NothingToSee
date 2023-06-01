@@ -9,7 +9,7 @@
 
 @media (max-width: 768px) {
     /* Responsive font size for mobile devices */
-    .loading-dots {
+    .loadingDots {
         font-size: 1.5rem;
     }
 }

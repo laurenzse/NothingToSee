@@ -1,12 +1,16 @@
 "use client";
 import YouTubeAudioPlayer from "./YouTubeAudioPlayer";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import LoadingDots from "@/components/LoadingDots";
 import { getSoundscapeLink } from "../lib/soundscapes";
 import MuteIcon from "./MuteIcon";
 import styles from "../styles/MinimalPlayer.module.css";
 
-const MinimalPlayer = () => {
+interface MinimalPlayerProps {
+  sourceURLChanged: (url: string) => void;
+}
+
+const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [youTubeURL, setYouTubeURL] = useState<string>();
@@ -49,6 +53,7 @@ const MinimalPlayer = () => {
   const chooseNewYouTubeURL = async () => {
     try {
       const youTubeURL = await getSoundscapeLink();
+      sourceURLChanged(youTubeURL);
       setYouTubeURL(youTubeURL);
     } catch (error) {
       console.error("Failed to fetch YouTube video data:", error);
