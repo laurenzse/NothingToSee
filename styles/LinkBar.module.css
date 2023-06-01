@@ -1,0 +1,13 @@
+.bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Media query for stacking the links when space is limited */
+@media (max-width: 768px) {
+    .bar {
+        flex-direction: column;
+        align-items: center;
+    }
+}

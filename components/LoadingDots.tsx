@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../styles/LoadingDots.css";
+import styles from "../styles/LoadingDots.module.css";
 
 const LoadingDots: React.FC = () => {
   const [dotState, setDotState] = useState<number>(0);
@@ -37,7 +37,7 @@ const LoadingDots: React.FC = () => {
   };
 
   return (
-    <div className={`loading-dots`}>
+    <div className={styles.loadingDots}>
       {getDotContent(dotState)} {/* Render the dot content */}
     </div>
   );

@@ -1,12 +1,10 @@
 "use client";
-import Image from "next/image";
 import YouTubeAudioPlayer from "./YouTubeAudioPlayer";
 import { useState, useEffect } from "react";
 import LoadingDots from "@/components/LoadingDots";
 import { getSoundscapeLink } from "../lib/soundscapes";
 import MuteIcon from "./MuteIcon";
-import "../styles/split-layout.css";
-import "../styles/globals.css";
+import styles from "../styles/MinimalPlayer.module.css";
 
 const MinimalPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -76,16 +74,16 @@ const MinimalPlayer = () => {
 
   return (
     <div className="split-layout fill-container">
-      <div className="section lowered-element">
+      <div className={`${styles.section} ${styles.loweredElement}`}>
         {!isPlaying && (
-          <div className="centered-element">
-            <MuteIcon className="mute-icon" />
+          <div className={`${styles.centeredElement}`}>
+            <MuteIcon className={`${styles.muteIcon}`} />
           </div>
         )}
       </div>
-      <div className="section raised-element">
+      <div className={`${styles.section} ${styles.raisedElement}`}>
         {isLoading && (
-          <div className="centered-element">
+          <div className={`${styles.centeredElement}`}>
             <LoadingDots />
           </div>
         )}

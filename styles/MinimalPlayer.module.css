@@ -1,0 +1,23 @@
+.section {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+}
+
+.loweredElement {
+    margin-bottom: -20%;
+}
+
+.raisedElement {
+    margin-top: -20%;
+}
+
+.centeredElement {
+    text-align: center;
+}
+
+.muteIcon {
+    stroke: currentColor;
+}
+

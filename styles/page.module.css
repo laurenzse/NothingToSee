@@ -1,0 +1,8 @@
+.barComplement {
+  flex: 1;
+  height: 100px;
+}
+
+.barElement {
+  background-color: aquamarine;
+}
