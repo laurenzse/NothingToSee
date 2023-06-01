@@ -64,7 +64,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
         );
       }
     }
-  }, [onReady, updatePlayingState]);
+  }, [onReady]);
 
   // Dispose the Video.js player when the functional component unmounts
   useEffect(() => {
@@ -112,11 +112,11 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
       player.currentTime(startAt);
       updatePlayingState();
     }
-  }, [youtubeURL, startAt, updatePlayingState]);
+  }, [youtubeURL, startAt]);
 
   useEffect(() => {
     updatePlayingState();
-  }, [isPlaying, updatePlayingState]);
+  }, [isPlaying]);
 
   useEffect(() => {
     const handleCanPlay = () => {
