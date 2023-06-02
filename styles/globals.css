@@ -191,7 +191,7 @@ sup { font-size: 80%; vertical-align: top; }
     height: 0;
 }
 .fill-page {
-    height: 100vh;
+    height: 100dvh;
 }
 
 .fill-container {
