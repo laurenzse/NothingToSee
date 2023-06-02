@@ -84,14 +84,11 @@ const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
       </div>
       {youTubeURL && (
         <YouTubeAudioPlayer
-          youtubeURL={youTubeURL}
-          onReady={onReady}
-          onWaiting={onWaiting}
-          onResumed={onResumedPlaying}
-          onPlay={onPlay}
-          onPause={onPause}
+          youtubeUrl={youTubeURL}
+          startTime={3}
+          onLoading={(isLoading) => setIsLoading(isLoading)}
+          onPlaying={(isPlaying) => setIsPlaying(isPlaying)}
           onEnded={onEnded}
-          startAt={3}
           isPlaying={isPlaying}
         />
       )}
