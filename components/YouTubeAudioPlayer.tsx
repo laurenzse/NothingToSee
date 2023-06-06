@@ -27,9 +27,14 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
   startAt = 0,
   isPlaying,
 }) => {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   const audioRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<Player | null>(null);
-  const [hasWaitedInitially, setWaitedInitially] = useState(false);
+  const isLoading = useRef(true);
+  const embeddedIsPlaying = useRef(false);
+  const hasWaitedInitially = useRef(false);
+  const hasReceivedPlayInitially = useRef(false);
 
   const updatePlayingState = () => {
     if (isPlaying) {
@@ -58,9 +63,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
             audioOnlyMode: true,
             preload: "auto", // Preload the audio
           },
-          () => {
-            updatePlayingState();
-          }
+          () => {}
         );
       }
     }
@@ -81,20 +84,23 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
   const playAudio = () => {
     const player = playerRef.current;
 
-    if (player) {
-      if (player.currentSrc()) {
+    if (player && player.currentSrc()) {
+      if (!embeddedIsPlaying.current) {
         player.play();
-      } else {
-        console.error("Audio source not set.");
+        embeddedIsPlaying.current = true;
       }
+    } else {
+      console.error("Audio source not set.");
     }
   };
 
   const pauseAudio = () => {
     const player = playerRef.current;
 
-    if (player) {
+    if (player && embeddedIsPlaying.current) {
       player.pause();
+      console.log("pausing player");
+      embeddedIsPlaying.current = false;
     }
   };
 
@@ -110,7 +116,6 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
       ];
       player.src(sources);
       player.currentTime(startAt);
-      updatePlayingState();
     }
   }, [youtubeURL, startAt]);
 
@@ -121,31 +126,61 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
   useEffect(() => {
     const handleCanPlay = () => {
       const player = playerRef.current;
+      console.log("player ready");
 
-      if (player) {
+      if (player && !isSafari) {
         onReady();
+      }
+    };
+
+    const handleCanPlay2 = () => {
+      const player = playerRef.current;
+      console.log("canplay");
+
+      if (player && isLoading.current) {
+        console.log("canplay send out");
+        isLoading.current = false;
+        onReady();
+      }
+      if (!embeddedIsPlaying.current) {
+        console.log("canplay send pause");
+        onPause();
       }
     };
 
     const handleWaiting = () => {
       // the first time the player sends the waiting event seems to be always erroneous
       // and we can actually already play the video
-      if (hasWaitedInitially) {
+      if (hasWaitedInitially.current) {
+        console.log("passed waiting");
+        isLoading.current = true;
         onWaiting();
       } else {
-        setWaitedInitially(true);
+        console.log("ignored waiting");
+        hasWaitedInitially.current = true;
       }
     };
 
     const handleResumed = () => {
+      isLoading.current = false;
       onResumed();
     };
 
     const handlePlay = () => {
-      onPlay();
+      console.log("handlePlay");
+      if (hasReceivedPlayInitially.current) {
+        embeddedIsPlaying.current = true;
+        isLoading.current = false;
+        onPlay();
+      } else {
+        hasReceivedPlayInitially.current = true;
+      }
     };
 
     const handlePause = () => {
+      console.log("handlePause");
+      embeddedIsPlaying.current = false;
+      isLoading.current = false;
       onPause();
     };
 
@@ -157,7 +192,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
 
     if (player) {
       player.on("ready", handleCanPlay);
-      player.on("canplay", handleCanPlay);
+      player.on("canplay", handleCanPlay2);
       player.on("waiting", handleWaiting);
       player.on("playing", handleResumed);
       player.on("play", handlePlay);

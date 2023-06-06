@@ -29,11 +29,17 @@ const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
 
   const onPlay = () => {
     // if media is state is set from outside, e.g. by media keys, update UI and state accordingly
-    setIsPlaying(true);
+    console.log("set play");
+    if (!isPlaying) {
+      setIsPlaying(true);
+    }
   };
 
   const onPause = () => {
-    setIsPlaying(false);
+    console.log("set pause");
+    if (isPlaying) {
+      setIsPlaying(false);
+    }
   };
 
   const onEnded = () => {
