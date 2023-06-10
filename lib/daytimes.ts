@@ -8,7 +8,7 @@ enum DayTime {
 
 async function fetchIpInfo(): Promise<any | null> {
   try {
-    const response = await fetch("http://ip-api.com/json");
+    const response = await fetch("https://geolocation-db.com/json/");
     if (response.ok) {
       return response.json();
     } else {
@@ -22,7 +22,7 @@ async function fetchIpInfo(): Promise<any | null> {
 
 export async function getSunTimes(): Promise<SunCalc.GetTimesResult> {
   const ipInfo = await fetchIpInfo();
-  return SunCalc.getTimes(new Date(), ipInfo["lat"], ipInfo["lon"]);
+  return SunCalc.getTimes(new Date(), ipInfo["latitude"], ipInfo["longitude"]);
 }
 
 export async function getCurrentDayTime() {
