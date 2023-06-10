@@ -36,10 +36,10 @@ export async function getCurrentDayTime() {
 
   const currentDate = new Date();
 
-  if (currentDate <= sunTimes["nightEnd"]) {
+  if (currentDate <= sunTimes["dawn"]) {
     return DayTime.Night;
   } else if (
-    currentDate > sunTimes["nightEnd"] &&
+    currentDate > sunTimes["dawn"] &&
     currentDate <= sunTimes["sunriseEnd"]
   ) {
     return DayTime.Dawn;
@@ -50,10 +50,10 @@ export async function getCurrentDayTime() {
     return DayTime.Day;
   } else if (
     currentDate > sunTimes["goldenHour"] &&
-    currentDate <= sunTimes["night"]
+    currentDate <= sunTimes["dusk"]
   ) {
     return DayTime.Dawn;
-  } else if (currentDate > sunTimes["night"]) {
+  } else if (currentDate > sunTimes["dusk"]) {
     return DayTime.Night;
   }
   return DayTime.Day;
