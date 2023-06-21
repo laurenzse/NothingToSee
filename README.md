@@ -1,34 +1,28 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Minimalist Soundscape Experience
 
-## Getting Started
+Motivated by my own need for an appropriate working soundscape, I created this web application that plays natural soundscapes with minimal user interaction. The core principle was to make the app act as an „acoustic window" rather than a traditional media player.
 
-First, run the development server:
+Using the current sunrise and sunset times, the app determines the currently appropriate time setting, night, dawn, and day, and selects a soundscape from a curated list each time it is launched. The app has a minimalist interface with only one interaction: muting and unmuting the soundscape - in line with the "window" metaphor mentioned above. When an audio stream ends, the app picks a new one automatically. To get a different soundscape, the user reloads the page.
+
+For more background information, please view this [post](https://laurenzseidel.com/projects/serene-sounds) on my personal web page.
+
+The app is currently hosted on [Vercel](https://vercel.com) and available [online](https://nothing-to-see-phi.vercel.app) for you to try out.
+
+## Development
+
+First, install the dependencies and run the development server:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the running page.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Adding new soundscapes
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+You can add new soundscapes by appending YouTube links and the appropriate category to the `public/soundscapes.csv` file. The category is encoded as an integer, where 1 is night, 2 is dawn, and 3 is day.
 
-## Learn More
+If you want to batch categorize YouTube videos, you may find the [YouTube Video Categorizer](https://github.com/laurenzse/YouTubeVideoCategorizer) repository helpful.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Feel free to create pull requests for new soundscapes (or other changes and features).
