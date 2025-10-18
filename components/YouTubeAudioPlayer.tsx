@@ -63,6 +63,8 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
   startAt = 0,
   isPlaying,
 }) => {
+  console.log("[YouTubeAudioPlayer] Component render", { youtubeURL, isPlaying });
+
   /**
    * Safari-specific detection for handling browser quirks.
    * Safari has issues with video.js event timing that require workarounds.
@@ -150,6 +152,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
     const player = playerRef.current;
 
     if (player) {
+      console.log("[YouTubeAudioPlayer] Loading new video:", youtubeURL);
       const sources = [
         {
           type: "video/youtube",
@@ -178,6 +181,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
      * Safari quirk: "ready" event timing differs from other browsers
      */
     const handleReady = () => {
+      console.log("[YouTubeAudioPlayer] READY event", { isSafari });
       if (!isSafari) {
         onReady();
       }
@@ -188,6 +192,10 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
      * Handles initial loading state
      */
     const handleCanPlay = () => {
+      console.log("[YouTubeAudioPlayer] CANPLAY event", {
+        isLoading: state.isLoading,
+        embeddedIsPlaying: state.embeddedIsPlaying,
+      });
       if (state.isLoading) {
         dispatch({ type: "SET_LOADING", isLoading: false });
         onReady();
@@ -202,6 +210,9 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
      * Ignore the first occurrence to prevent false loading states
      */
     const handleWaiting = () => {
+      console.log("[YouTubeAudioPlayer] WAITING event", {
+        hasWaitedInitially: state.hasWaitedInitially,
+      });
       if (state.hasWaitedInitially) {
         dispatch({ type: "SET_LOADING", isLoading: true });
         onWaiting();
@@ -211,6 +222,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
     };
 
     const handlePlaying = () => {
+      console.log("[YouTubeAudioPlayer] PLAYING event");
       dispatch({ type: "SET_LOADING", isLoading: false });
       onResumed();
     };
@@ -220,6 +232,9 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
      * Ignore the first occurrence to prevent false play state
      */
     const handlePlay = () => {
+      console.log("[YouTubeAudioPlayer] PLAY event", {
+        hasReceivedPlayInitially: state.hasReceivedPlayInitially,
+      });
       if (state.hasReceivedPlayInitially) {
         dispatch({ type: "SET_EMBEDDED_PLAYING", isPlaying: true });
         dispatch({ type: "SET_LOADING", isLoading: false });
@@ -230,13 +245,55 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
     };
 
     const handlePause = () => {
+      console.log("[YouTubeAudioPlayer] PAUSE event");
       dispatch({ type: "SET_EMBEDDED_PLAYING", isPlaying: false });
       dispatch({ type: "SET_LOADING", isLoading: false });
       onPause();
     };
 
+    /**
+     * Safari sometimes fires spurious "ended" events during playback.
+     * Verify the video actually ended by checking currentTime vs duration.
+     */
     const handleEnded = () => {
+      const player = playerRef.current;
+      if (!player) return;
+
+      const duration = player.duration() || 0;
+      const currentTime = player.currentTime() || 0;
+      const remaining = duration - currentTime;
+
+      console.log("[YouTubeAudioPlayer] ENDED event fired", {
+        isSafari,
+        duration,
+        currentTime,
+        remaining,
+        willTriggerNewVideo: isSafari ? remaining <= 2 : true,
+      });
+
+      // For Safari, verify the video actually ended
+      if (isSafari) {
+        // Only trigger ended if we're actually at the end (within 2 seconds)
+        if (duration && currentTime && remaining > 2) {
+          console.warn("[YouTubeAudioPlayer] Safari false ended event - IGNORING", {
+            remaining,
+          });
+          return;
+        }
+      }
+
+      console.log("[YouTubeAudioPlayer] Triggering new soundscape");
       onEnded();
+    };
+
+    const handleError = (error?: any) => {
+      console.error("[YouTubeAudioPlayer] ERROR event", error);
+      const player = playerRef.current;
+      if (player) {
+        const playerError = player.error();
+        console.error("[YouTubeAudioPlayer] Player error details:", playerError);
+      }
+      // Don't trigger onEnded on errors - just log them
     };
 
     // Attach event listeners
@@ -247,6 +304,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
     player.on("play", handlePlay);
     player.on("pause", handlePause);
     player.on("ended", handleEnded);
+    player.on("error", handleError);
 
     // Cleanup
     return () => {
@@ -258,6 +316,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
         player.off("play", handlePlay);
         player.off("pause", handlePause);
         player.off("ended", handleEnded);
+        player.off("error", handleError);
       }
     };
   }, [

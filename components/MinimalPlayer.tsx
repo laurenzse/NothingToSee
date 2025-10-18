@@ -37,8 +37,10 @@ const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
   }, []);
 
   const chooseNewYouTubeURL = useCallback(async () => {
+    console.log("[MinimalPlayer] chooseNewYouTubeURL called");
     try {
       const newURL = await getSoundscapeLink();
+      console.log("[MinimalPlayer] New soundscape URL:", newURL);
       sourceURLChanged(newURL);
       setYouTubeURL(newURL);
     } catch (error) {
@@ -47,6 +49,7 @@ const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
   }, [sourceURLChanged]);
 
   const onEnded = useCallback(() => {
+    console.log("[MinimalPlayer] onEnded called - loading new soundscape");
     chooseNewYouTubeURL();
   }, [chooseNewYouTubeURL]);
 
@@ -57,7 +60,8 @@ const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
   // Load initial soundscape on mount
   useEffect(() => {
     chooseNewYouTubeURL();
-  }, [chooseNewYouTubeURL]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="split-layout fill-container" onClick={handleClick}>
