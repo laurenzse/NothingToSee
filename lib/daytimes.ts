@@ -7,38 +7,28 @@ enum DayTime {
 }
 
 async function fetchIpInfo(): Promise<any | null> {
-  // Try multiple geolocation services for reliability
-  const services = [
-    {
-      url: "https://ipapi.co/json/",
-      parser: (data: any) => ({ latitude: data.latitude, longitude: data.longitude }),
-    },
-    {
-      url: "https://freeipapi.com/api/json",
-      parser: (data: any) => ({ latitude: data.latitude, longitude: data.longitude }),
-    },
-  ];
+  try {
+    // Use our Next.js API route which bypasses CORS restrictions
+    const response = await fetch("/api/geolocation", {
+      cache: "no-store",
+    });
 
-  for (const service of services) {
-    try {
-      const response = await fetch(service.url, {
-        cache: "no-store",
-      });
-      if (response.ok) {
-        const data = await response.json();
-        const coords = service.parser(data);
-        if (coords.latitude && coords.longitude) {
-          console.log("Geolocation data received:", coords);
-          return coords;
-        }
+    if (response.ok) {
+      const data = await response.json();
+
+      // Check if we got coordinates (either from service or fallback)
+      if (data.location?.latitude && data.location?.longitude) {
+        return {
+          latitude: data.location.latitude,
+          longitude: data.location.longitude,
+        };
       }
-    } catch (error) {
-      console.warn(`Geolocation service ${service.url} failed:`, error);
-      // Continue to next service
     }
+  } catch (error) {
+    // API route failed
   }
 
-  console.error("All geolocation services failed");
+  // If API route fails, return null and use hardcoded fallback
   return null;
 }
 
@@ -46,8 +36,8 @@ export async function getSunTimes(): Promise<SunCalc.GetTimesResult> {
   const ipInfo = await fetchIpInfo();
 
   if (!ipInfo || !ipInfo.latitude || !ipInfo.longitude) {
-    // Fallback to default coordinates (e.g., London) if geolocation fails
-    console.warn("Could not fetch location, using default coordinates (London)");
+    // Fallback to default coordinates when geolocation is unavailable
+    // Using London as a reasonable default for European timezone
     return SunCalc.getTimes(new Date(), 51.5074, -0.1278);
   }
 

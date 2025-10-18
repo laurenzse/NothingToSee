@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useCallback, useReducer } from "react";
 import videojs from "video.js";
 import Player from "video.js/dist/types/player";
 import "videojs-youtube";
@@ -15,6 +15,43 @@ interface YouTubeAudioPlayerProps {
   isPlaying: boolean;
 }
 
+// State for tracking player initialization quirks
+interface PlayerState {
+  isLoading: boolean;
+  embeddedIsPlaying: boolean;
+  hasWaitedInitially: boolean;
+  hasReceivedPlayInitially: boolean;
+}
+
+type PlayerAction =
+  | { type: "SET_LOADING"; isLoading: boolean }
+  | { type: "SET_EMBEDDED_PLAYING"; isPlaying: boolean }
+  | { type: "MARK_WAITED_INITIALLY" }
+  | { type: "MARK_RECEIVED_PLAY_INITIALLY" }
+  | { type: "RESET" };
+
+const playerReducer = (state: PlayerState, action: PlayerAction): PlayerState => {
+  switch (action.type) {
+    case "SET_LOADING":
+      return { ...state, isLoading: action.isLoading };
+    case "SET_EMBEDDED_PLAYING":
+      return { ...state, embeddedIsPlaying: action.isPlaying };
+    case "MARK_WAITED_INITIALLY":
+      return { ...state, hasWaitedInitially: true };
+    case "MARK_RECEIVED_PLAY_INITIALLY":
+      return { ...state, hasReceivedPlayInitially: true };
+    case "RESET":
+      return {
+        isLoading: true,
+        embeddedIsPlaying: false,
+        hasWaitedInitially: false,
+        hasReceivedPlayInitially: false,
+      };
+    default:
+      return state;
+  }
+};
+
 const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
   youtubeURL,
   onReady,
@@ -26,53 +63,50 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
   startAt = 0,
   isPlaying,
 }) => {
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  /**
+   * Safari-specific detection for handling browser quirks.
+   * Safari has issues with video.js event timing that require workarounds.
+   * See: Video.js initialization behavior differs in Safari vs other browsers
+   */
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
   const audioRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<Player | null>(null);
-  const isLoading = useRef(true);
-  const embeddedIsPlaying = useRef(false);
-  const hasWaitedInitially = useRef(false);
-  const hasReceivedPlayInitially = useRef(false);
 
-  const updatePlayingState = () => {
-    if (isPlaying) {
-      playAudio();
-    } else {
-      pauseAudio();
-    }
-  };
+  const [state, dispatch] = useReducer(playerReducer, {
+    isLoading: true,
+    embeddedIsPlaying: false,
+    hasWaitedInitially: false,
+    hasReceivedPlayInitially: false,
+  });
 
+  // Initialize video.js player once
   useEffect(() => {
-    // Make sure Video.js player is only initialized once
-    if (!playerRef.current) {
-      // The Video.js player needs to be _inside_ the component el for React 18 Strict Mode.
+    if (!playerRef.current && audioRef.current) {
+      // The Video.js player needs to be inside the component element for React 18 Strict Mode
       const audioElement = document.createElement("audio");
       audioElement.classList.add("video-js");
       audioElement.classList.add("hidden");
 
-      if (audioRef.current) {
-        audioRef.current.appendChild(audioElement);
+      audioRef.current.appendChild(audioElement);
 
-        playerRef.current = videojs(
-          audioElement,
-          {
-            controls: false, // Disable control elements
-            autoplay: true, // Enable autoplay as this causes YouTube to begin loading
-            audioOnlyMode: true,
-            preload: "auto", // Preload the audio
-          },
-          () => {}
-        );
-      }
+      playerRef.current = videojs(
+        audioElement,
+        {
+          controls: false,
+          autoplay: true, // Start loading immediately
+          audioOnlyMode: true,
+          preload: "auto",
+        },
+        () => {}
+      );
     }
-  }, [onReady]);
+  }, []);
 
-  // Dispose the Video.js player when the functional component unmounts
+  // Dispose video.js player on unmount
   useEffect(() => {
     return () => {
       const player = playerRef.current;
-
       if (player && !player.isDisposed()) {
         player.dispose();
         playerRef.current = null;
@@ -80,106 +114,124 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
     };
   }, []);
 
-  const playAudio = () => {
+  // Play audio function with state management
+  const playAudio = useCallback(() => {
     const player = playerRef.current;
 
     if (player && player.currentSrc()) {
-      if (!embeddedIsPlaying.current) {
+      if (!state.embeddedIsPlaying) {
         player.play();
-        embeddedIsPlaying.current = true;
+        dispatch({ type: "SET_EMBEDDED_PLAYING", isPlaying: true });
       }
-    } else {
-      console.error("Audio source not set.");
     }
-  };
+  }, [state.embeddedIsPlaying]);
 
-  const pauseAudio = () => {
+  // Pause audio function with state management
+  const pauseAudio = useCallback(() => {
     const player = playerRef.current;
 
-    if (player && embeddedIsPlaying.current) {
+    if (player && state.embeddedIsPlaying) {
       player.pause();
-      console.log("pausing player");
-      embeddedIsPlaying.current = false;
+      dispatch({ type: "SET_EMBEDDED_PLAYING", isPlaying: false });
     }
-  };
+  }, [state.embeddedIsPlaying]);
 
+  // Update playing state when isPlaying prop changes
+  const updatePlayingState = useCallback(() => {
+    if (isPlaying) {
+      playAudio();
+    } else {
+      pauseAudio();
+    }
+  }, [isPlaying, playAudio, pauseAudio]);
+
+  // Update video source when URL changes
   useEffect(() => {
     const player = playerRef.current;
 
     if (player) {
       const sources = [
         {
-          type: "video/youtube", //important
+          type: "video/youtube",
           src: youtubeURL,
         },
       ];
       player.src(sources);
       player.currentTime(startAt);
+
+      // Reset state when new video loads
+      dispatch({ type: "RESET" });
     }
   }, [youtubeURL, startAt]);
 
+  // Sync playing state with prop
   useEffect(() => {
     updatePlayingState();
-  }, [isPlaying]);
+  }, [updatePlayingState]);
 
+  // Setup event handlers
   useEffect(() => {
-    const handleCanPlay = () => {
-      const player = playerRef.current;
-      console.log("player ready");
+    const player = playerRef.current;
+    if (!player) return;
 
-      if (player && !isSafari) {
+    /**
+     * Safari quirk: "ready" event timing differs from other browsers
+     */
+    const handleReady = () => {
+      if (!isSafari) {
         onReady();
       }
     };
 
-    const handleCanPlay2 = () => {
-      const player = playerRef.current;
-      console.log("canplay");
-
-      if (player && isLoading.current) {
-        console.log("canplay send out");
-        isLoading.current = false;
+    /**
+     * Main readiness handler - fires when player can play
+     * Handles initial loading state
+     */
+    const handleCanPlay = () => {
+      if (state.isLoading) {
+        dispatch({ type: "SET_LOADING", isLoading: false });
         onReady();
       }
-      if (!embeddedIsPlaying.current) {
-        console.log("canplay send pause");
+      if (!state.embeddedIsPlaying) {
         onPause();
       }
     };
 
+    /**
+     * Video.js quirk: First "waiting" event often fires erroneously
+     * Ignore the first occurrence to prevent false loading states
+     */
     const handleWaiting = () => {
-      // the first time the player sends the waiting event seems to be always erroneous
-      // and we can actually already play the video
-      if (hasWaitedInitially.current) {
-        console.log("passed waiting");
-        isLoading.current = true;
+      if (state.hasWaitedInitially) {
+        dispatch({ type: "SET_LOADING", isLoading: true });
         onWaiting();
       } else {
-        console.log("ignored waiting");
-        hasWaitedInitially.current = true;
+        dispatch({ type: "MARK_WAITED_INITIALLY" });
       }
     };
 
-    const handleResumed = () => {
-      isLoading.current = false;
+    const handlePlaying = () => {
+      dispatch({ type: "SET_LOADING", isLoading: false });
       onResumed();
     };
 
+    /**
+     * Video.js quirk: First "play" event fires during initialization
+     * Ignore the first occurrence to prevent false play state
+     */
     const handlePlay = () => {
-      console.log("handlePlay");
-      if (hasReceivedPlayInitially.current) {
-        embeddedIsPlaying.current = true;
-        isLoading.current = false;
+      if (state.hasReceivedPlayInitially) {
+        dispatch({ type: "SET_EMBEDDED_PLAYING", isPlaying: true });
+        dispatch({ type: "SET_LOADING", isLoading: false });
         onPlay();
       } else {
-        hasReceivedPlayInitially.current = true;
+        dispatch({ type: "MARK_RECEIVED_PLAY_INITIALLY" });
       }
     };
 
     const handlePause = () => {
-      console.log("handlePause");
-      embeddedIsPlaying.current = false;
-      isLoading.current = false;
+      dispatch({ type: "SET_EMBEDDED_PLAYING", isPlaying: false });
+      dispatch({ type: "SET_LOADING", isLoading: false });
       onPause();
     };
 
@@ -187,33 +239,40 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
       onEnded();
     };
 
-    const player = playerRef.current;
+    // Attach event listeners
+    player.on("ready", handleReady);
+    player.on("canplay", handleCanPlay);
+    player.on("waiting", handleWaiting);
+    player.on("playing", handlePlaying);
+    player.on("play", handlePlay);
+    player.on("pause", handlePause);
+    player.on("ended", handleEnded);
 
-    if (player) {
-      player.on("ready", handleCanPlay);
-      player.on("canplay", handleCanPlay2);
-      player.on("waiting", handleWaiting);
-      player.on("playing", handleResumed);
-      player.on("play", handlePlay);
-      player.on("pause", handlePause);
-      player.on("ended", handleEnded);
-    }
-
-    // Clean up the event listener when the component unmounts
+    // Cleanup
     return () => {
-      const player = playerRef.current;
-
       if (player) {
-        player.off("ready", handleCanPlay);
+        player.off("ready", handleReady);
         player.off("canplay", handleCanPlay);
         player.off("waiting", handleWaiting);
-        player.off("playing", handleResumed);
+        player.off("playing", handlePlaying);
         player.off("play", handlePlay);
         player.off("pause", handlePause);
         player.off("ended", handleEnded);
       }
     };
-  }, [onReady, onWaiting, onResumed, onPlay, onPause]);
+  }, [
+    isSafari,
+    state.isLoading,
+    state.embeddedIsPlaying,
+    state.hasWaitedInitially,
+    state.hasReceivedPlayInitially,
+    onReady,
+    onWaiting,
+    onResumed,
+    onPlay,
+    onPause,
+    onEnded,
+  ]);
 
   return (
     <div data-vjs-player className={"hidden"}>

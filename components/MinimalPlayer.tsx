@@ -1,6 +1,6 @@
 "use client";
 import YouTubeAudioPlayer from "./YouTubeAudioPlayer";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import LoadingDots from "@/components/LoadingDots";
 import { getSoundscapeLink } from "@/lib/soundscapes";
 import MuteIcon from "./MuteIcon";
@@ -15,62 +15,49 @@ const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [youTubeURL, setYouTubeURL] = useState<string>();
 
-  const onReady = () => {
+  const onReady = useCallback(() => {
     setIsLoading(false);
-  };
+  }, []);
 
-  const onWaiting = () => {
+  const onWaiting = useCallback(() => {
     setIsLoading(true);
-  };
+  }, []);
 
-  const onResumedPlaying = () => {
+  const onResumedPlaying = useCallback(() => {
     setIsLoading(false);
-  };
+  }, []);
 
-  const onPlay = () => {
-    // if media is state is set from outside, e.g. by media keys, update UI and state accordingly
-    console.log("set play");
-    if (!isPlaying) {
-      setIsPlaying(true);
-    }
-  };
+  const onPlay = useCallback(() => {
+    // Media state can be set from outside (e.g., by media keys)
+    setIsPlaying(true);
+  }, []);
 
-  const onPause = () => {
-    console.log("set pause");
-    if (isPlaying) {
-      setIsPlaying(false);
-    }
-  };
+  const onPause = useCallback(() => {
+    setIsPlaying(false);
+  }, []);
 
-  const onEnded = () => {
-    (async () => {
-      try {
-        await chooseNewYouTubeURL();
-      } catch (error) {
-        console.error("Failed to choose YouTube video:", error);
-      }
-    })();
-  };
-
-  const handleClick = () => {
-    setIsPlaying(!isPlaying);
-  };
-
-  const chooseNewYouTubeURL = async () => {
+  const chooseNewYouTubeURL = useCallback(async () => {
     try {
-      const youTubeURL = await getSoundscapeLink();
-      sourceURLChanged(youTubeURL);
-      setYouTubeURL(youTubeURL);
+      const newURL = await getSoundscapeLink();
+      sourceURLChanged(newURL);
+      setYouTubeURL(newURL);
     } catch (error) {
-      console.error("Failed to fetch YouTube video data:", error);
+      console.error("Failed to fetch YouTube video:", error);
     }
-  };
+  }, [sourceURLChanged]);
 
+  const onEnded = useCallback(() => {
+    chooseNewYouTubeURL();
+  }, [chooseNewYouTubeURL]);
+
+  const handleClick = useCallback(() => {
+    setIsPlaying((prev) => !prev);
+  }, []);
+
+  // Load initial soundscape on mount
   useEffect(() => {
     chooseNewYouTubeURL();
-
-    return () => {};
-  }, []);
+  }, [chooseNewYouTubeURL]);
 
   return (
     <div className="split-layout fill-container" onClick={handleClick}>
