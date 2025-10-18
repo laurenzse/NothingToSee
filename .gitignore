@@ -131,3 +131,6 @@ graphql_schema.json
 .graphql_cache
 .graphql_ppx_cache
 /next-env.d.ts
+
+#GenAI
+.claude
