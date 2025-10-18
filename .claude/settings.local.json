@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git log:*)",
+      "Bash(npm install video.js@latest videojs-youtube@latest)",
+      "Bash(npm run build)",
+      "Bash(npm install)",
+      "Bash(npm install eslint@latest)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

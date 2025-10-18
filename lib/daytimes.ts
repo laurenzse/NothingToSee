@@ -7,22 +7,51 @@ enum DayTime {
 }
 
 async function fetchIpInfo(): Promise<any | null> {
-  try {
-    const response = await fetch("https://geolocation-db.com/json/");
-    if (response.ok) {
-      return response.json();
-    } else {
-      console.error("Request failed with status " + response.status);
+  // Try multiple geolocation services for reliability
+  const services = [
+    {
+      url: "https://ipapi.co/json/",
+      parser: (data: any) => ({ latitude: data.latitude, longitude: data.longitude }),
+    },
+    {
+      url: "https://freeipapi.com/api/json",
+      parser: (data: any) => ({ latitude: data.latitude, longitude: data.longitude }),
+    },
+  ];
+
+  for (const service of services) {
+    try {
+      const response = await fetch(service.url, {
+        cache: "no-store",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const coords = service.parser(data);
+        if (coords.latitude && coords.longitude) {
+          console.log("Geolocation data received:", coords);
+          return coords;
+        }
+      }
+    } catch (error) {
+      console.warn(`Geolocation service ${service.url} failed:`, error);
+      // Continue to next service
     }
-  } catch (error) {
-    console.error("Request failed with status: ", error);
-    return null;
   }
+
+  console.error("All geolocation services failed");
+  return null;
 }
 
 export async function getSunTimes(): Promise<SunCalc.GetTimesResult> {
   const ipInfo = await fetchIpInfo();
-  return SunCalc.getTimes(new Date(), ipInfo["latitude"], ipInfo["longitude"]);
+
+  if (!ipInfo || !ipInfo.latitude || !ipInfo.longitude) {
+    // Fallback to default coordinates (e.g., London) if geolocation fails
+    console.warn("Could not fetch location, using default coordinates (London)");
+    return SunCalc.getTimes(new Date(), 51.5074, -0.1278);
+  }
+
+  return SunCalc.getTimes(new Date(), ipInfo.latitude, ipInfo.longitude);
 }
 
 export async function getCurrentDayTime() {

@@ -2,7 +2,6 @@ import React, { useRef, useEffect, useState } from "react";
 import videojs from "video.js";
 import Player from "video.js/dist/types/player";
 import "videojs-youtube";
-import "video.js/dist/video-js.css";
 
 interface YouTubeAudioPlayerProps {
   youtubeURL: string;
