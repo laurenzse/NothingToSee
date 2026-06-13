@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import videojs from "video.js";
 import Player from "video.js/dist/types/player";
 import "videojs-youtube";
@@ -57,14 +57,6 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
     },
   });
 
-  const updatePlayingState = () => {
-    if (isPlaying) {
-      playAudio();
-    } else {
-      pauseAudio();
-    }
-  };
-
   useEffect(() => {
     isSafari.current = /^((?!chrome|android).)*safari/i.test(
       navigator.userAgent
@@ -108,7 +100,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
     };
   }, [playbackWindow]);
 
-  const playAudio = () => {
+  const playAudio = useCallback(() => {
     const player = playerRef.current;
 
     if (player && player.currentSrc()) {
@@ -119,16 +111,16 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
     } else {
       console.error("Audio source not set.");
     }
-  };
+  }, []);
 
-  const pauseAudio = () => {
+  const pauseAudio = useCallback(() => {
     const player = playerRef.current;
 
     if (player && embeddedIsPlaying.current) {
       player.pause();
       embeddedIsPlaying.current = false;
     }
-  };
+  }, []);
 
   useEffect(() => {
     const player = playerRef.current;
@@ -154,8 +146,12 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
   }, [youtubeURL, sourceSession, startAt, playbackWindow]);
 
   useEffect(() => {
-    updatePlayingState();
-  }, [isPlaying]);
+    if (isPlaying) {
+      playAudio();
+    } else {
+      pauseAudio();
+    }
+  }, [isPlaying, pauseAudio, playAudio]);
 
   useEffect(() => {
     const applyPendingSeek = () => {
@@ -346,6 +342,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
     onPause,
     onEnded,
     onPlaybackWindowMuted,
+    playAudio,
   ]);
 
   return (

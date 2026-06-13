@@ -1,6 +1,6 @@
 "use client";
 import YouTubeAudioPlayer from "./YouTubeAudioPlayer";
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import LoadingDots from "@/components/LoadingDots";
 import { getSoundscapeLink } from "@/lib/soundscapes";
 import MuteIcon from "./MuteIcon";
@@ -77,7 +77,7 @@ const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
     setIsPlaying(!isPlaying);
   };
 
-  const chooseNewYouTubeURL = async () => {
+  const chooseNewYouTubeURL = useCallback(async () => {
     try {
       setIsLoading(true);
       const youTubeURL = await getSoundscapeLink();
@@ -88,13 +88,11 @@ const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
     } catch (error) {
       console.error("Failed to fetch YouTube video data:", error);
     }
-  };
+  }, [sourceURLChanged]);
 
   useEffect(() => {
     chooseNewYouTubeURL();
-
-    return () => {};
-  }, []);
+  }, [chooseNewYouTubeURL]);
 
   return (
     <div className="split-layout fill-container" onClick={handleClick}>
