@@ -14,6 +14,8 @@ const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [youTubeURL, setYouTubeURL] = useState<string>();
+  const [sourceVersion, setSourceVersion] = useState(0);
+  const [needsNewTrackBeforePlay, setNeedsNewTrackBeforePlay] = useState(false);
 
   const onReady = () => {
     setIsLoading(false);
@@ -29,14 +31,12 @@ const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
 
   const onPlay = () => {
     // if media is state is set from outside, e.g. by media keys, update UI and state accordingly
-    console.log("set play");
     if (!isPlaying) {
       setIsPlaying(true);
     }
   };
 
   const onPause = () => {
-    console.log("set pause");
     if (isPlaying) {
       setIsPlaying(false);
     }
@@ -52,15 +52,39 @@ const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
     })();
   };
 
+  const onPlaybackWindowMuted = () => {
+    setNeedsNewTrackBeforePlay(true);
+    setIsPlaying(false);
+    setIsLoading(false);
+  };
+
   const handleClick = () => {
+    if (!isPlaying && needsNewTrackBeforePlay) {
+      setNeedsNewTrackBeforePlay(false);
+      setIsPlaying(true);
+
+      (async () => {
+        try {
+          await chooseNewYouTubeURL();
+        } catch (error) {
+          console.error("Failed to choose YouTube video:", error);
+          setIsPlaying(false);
+        }
+      })();
+      return;
+    }
+
     setIsPlaying(!isPlaying);
   };
 
   const chooseNewYouTubeURL = async () => {
     try {
+      setIsLoading(true);
       const youTubeURL = await getSoundscapeLink();
       sourceURLChanged(youTubeURL);
       setYouTubeURL(youTubeURL);
+      setSourceVersion((version) => version + 1);
+      setNeedsNewTrackBeforePlay(false);
     } catch (error) {
       console.error("Failed to fetch YouTube video data:", error);
     }
@@ -91,12 +115,14 @@ const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
       {youTubeURL && (
         <YouTubeAudioPlayer
           youtubeURL={youTubeURL}
+          sourceVersion={sourceVersion}
           onReady={onReady}
           onWaiting={onWaiting}
           onResumed={onResumedPlaying}
           onPlay={onPlay}
           onPause={onPause}
           onEnded={onEnded}
+          onPlaybackWindowMuted={onPlaybackWindowMuted}
           startAt={3}
           isPlaying={isPlaying}
         />
