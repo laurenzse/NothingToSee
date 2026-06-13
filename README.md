@@ -37,6 +37,14 @@ npm run build
 
 The app estimates the listener's location through IP-based geolocation in order to calculate local sunrise and sunset times. If geolocation fails, it falls back to London coordinates.
 
+## Browser media behavior
+
+Browser behavior for media playback in background tabs can vary by browser, platform, power state, and embedded player implementation. App-level JavaScript should not assume that timers, media key events, source changes, or playback state callbacks will be delivered consistently while a tab is hidden. Prefer keeping time-limited behavior tied to the existing media player, and treat background playback handling as best-effort rather than fully deterministic.
+
+When browser behavior differs between foreground and background playback, prefer predictable foreground behavior and a safe fallback in the background over complex background synchronization. Avoid adding separate notification audio for playback-window events; use the existing media player state instead.
+
+Relevant references: [MDN Page Visibility API](https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API), [Chrome Page Lifecycle API](https://developer.chrome.com/docs/web-platform/page-lifecycle-api), and [MDN Media Session API](https://developer.mozilla.org/en-US/docs/Web/API/Media_Session_API).
+
 ## Adding new soundscapes
 
 You can add new soundscapes by appending YouTube links and the appropriate category to the `public/soundscapes.csv` file. The category is encoded as an integer, where 1 is night, 2 is dawn, and 3 is day.
