@@ -3,7 +3,7 @@ import videojs from "video.js";
 import Player from "video.js/dist/types/player";
 import "videojs-youtube";
 
-const ONE_HOUR_IN_SECONDS = 10;
+const ONE_HOUR_IN_SECONDS = 60 * 60;
 
 interface YouTubeAudioPlayerProps {
   youtubeURL: string;
@@ -47,15 +47,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
   const playbackWindowRemaining = useRef<number | null>(null);
   const playbackWindowTimerStartedAt = useRef<number | null>(null);
   const playbackWindowTimeout = useRef<number | null>(null);
-  const playbackDebugInterval = useRef<number | null>(null);
   const playbackWindowId = useRef(0);
-
-  const clearPlaybackDebugInterval = () => {
-    if (playbackDebugInterval.current !== null) {
-      window.clearInterval(playbackDebugInterval.current);
-      playbackDebugInterval.current = null;
-    }
-  };
 
   const clearPlaybackWindowTimeout = () => {
     if (playbackWindowTimeout.current !== null) {
@@ -107,7 +99,6 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
       const player = playerRef.current;
 
       clearPlaybackWindowTimeout();
-      clearPlaybackDebugInterval();
 
       if (player && !player.isDisposed()) {
         player.dispose();
@@ -143,7 +134,6 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
 
     if (player) {
       clearPlaybackWindowTimeout();
-      clearPlaybackDebugInterval();
       playbackWindowId.current += 1;
       hasConfiguredPlaybackWindow.current = false;
       hasMutedPlaybackWindow.current = false;
@@ -189,7 +179,6 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
       playbackWindowRemaining.current = 0;
       playbackWindowTimerStartedAt.current = null;
       clearPlaybackWindowTimeout();
-      clearPlaybackDebugInterval();
 
       if (document.hidden) {
         player.muted(true);
@@ -265,12 +254,6 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
       }
 
       player.currentTime(targetStart);
-      console.log("[soundscape-debug]", "Applied pending random start seek", {
-        sourceVersion,
-        windowId: playbackWindowId.current,
-        targetStart,
-        currentTimeBeforeSeek: currentTime,
-      });
     };
 
     const configurePlaybackWindow = () => {
@@ -301,22 +284,6 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
         player.currentTime(randomStart);
         playbackEndsAt.current = randomStart + ONE_HOUR_IN_SECONDS;
         playbackWindowRemaining.current = ONE_HOUR_IN_SECONDS;
-        console.log("[soundscape-debug]", "Selected random start", {
-          sourceVersion,
-          windowId,
-          duration,
-          randomStart,
-          playbackEndsAt: randomStart + ONE_HOUR_IN_SECONDS,
-        });
-
-        clearPlaybackDebugInterval();
-        playbackDebugInterval.current = window.setInterval(() => {
-          console.log("[soundscape-debug]", "Current player time", {
-            sourceVersion,
-            windowId,
-            currentTime: player.currentTime(),
-          });
-        }, 1000);
 
         if (isPlaying && embeddedIsPlaying.current && !isLoading.current) {
           startPlaybackWindowTimer(windowId);
