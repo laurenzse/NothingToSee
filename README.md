@@ -19,9 +19,39 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the running page.
 
+To verify the project before opening a pull request, run:
+
+```bash
+npm run build
+```
+
+## Architecture
+
+- `app/page.tsx` renders the main page shell and source/contact links.
+- `components/MinimalPlayer.tsx` owns playback state, loading state, and soundscape rotation.
+- `components/YouTubeAudioPlayer.tsx` wraps Video.js and the YouTube source plugin.
+- `lib/soundscapes.ts` reads and filters `public/soundscapes.csv`.
+- `lib/daytimes.ts` determines night, dawn, or day from geolocated sunrise/sunset data.
+
+## Location behavior
+
+The app estimates the listener's location through IP-based geolocation in order to calculate local sunrise and sunset times. If geolocation fails, it falls back to London coordinates.
+
 ## Adding new soundscapes
 
 You can add new soundscapes by appending YouTube links and the appropriate category to the `public/soundscapes.csv` file. The category is encoded as an integer, where 1 is night, 2 is dawn, and 3 is day.
+
+Each row in `public/soundscapes.csv` contains:
+
+```csv
+youtube_url,category
+```
+
+Categories:
+
+- `1`: night
+- `2`: dawn
+- `3`: day
 
 If you want to batch categorize YouTube videos, you may find the [YouTube Video Categorizer](https://github.com/laurenzse/YouTubeVideoCategorizer) repository helpful.
 
