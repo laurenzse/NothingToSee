@@ -14,7 +14,7 @@ const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [youTubeURL, setYouTubeURL] = useState<string>();
-  const [sourceVersion, setSourceVersion] = useState(0);
+  const [sourceSession, setSourceSession] = useState(0);
   const [needsNewTrackBeforePlay, setNeedsNewTrackBeforePlay] = useState(false);
 
   const onReady = () => {
@@ -83,7 +83,7 @@ const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
       const youTubeURL = await getSoundscapeLink();
       sourceURLChanged(youTubeURL);
       setYouTubeURL(youTubeURL);
-      setSourceVersion((version) => version + 1);
+      setSourceSession((session) => session + 1);
       setNeedsNewTrackBeforePlay(false);
     } catch (error) {
       console.error("Failed to fetch YouTube video data:", error);
@@ -115,7 +115,7 @@ const MinimalPlayer: React.FC<MinimalPlayerProps> = ({ sourceURLChanged }) => {
       {youTubeURL && (
         <YouTubeAudioPlayer
           youtubeURL={youTubeURL}
-          sourceVersion={sourceVersion}
+          sourceSession={sourceSession}
           onReady={onReady}
           onWaiting={onWaiting}
           onResumed={onResumedPlaying}

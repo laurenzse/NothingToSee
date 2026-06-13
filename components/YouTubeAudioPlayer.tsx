@@ -2,12 +2,13 @@ import React, { useRef, useEffect } from "react";
 import videojs from "video.js";
 import Player from "video.js/dist/types/player";
 import "videojs-youtube";
+import { usePlaybackWindow } from "./usePlaybackWindow";
 
 const ONE_HOUR_IN_SECONDS = 60 * 60;
 
 interface YouTubeAudioPlayerProps {
   youtubeURL: string;
-  sourceVersion: number;
+  sourceSession: number;
   onReady: () => void;
   onWaiting: () => void;
   onResumed: () => void;
@@ -21,7 +22,7 @@ interface YouTubeAudioPlayerProps {
 
 const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
   youtubeURL,
-  sourceVersion,
+  sourceSession,
   onReady,
   onWaiting,
   onResumed,
@@ -40,21 +41,21 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
   const hasWaitedInitially = useRef(false);
   const hasReceivedPlayInitially = useRef(false);
   const hasConfiguredPlaybackWindow = useRef(false);
-  const hasMutedPlaybackWindow = useRef(false);
   const isChangingSource = useRef(false);
-  const pendingSeekStart = useRef<number | null>(null);
-  const playbackEndsAt = useRef<number | null>(null);
-  const playbackWindowRemaining = useRef<number | null>(null);
-  const playbackWindowTimerStartedAt = useRef<number | null>(null);
-  const playbackWindowTimeout = useRef<number | null>(null);
-  const playbackWindowId = useRef(0);
+  const playbackWindow = usePlaybackWindow({
+    windowSeconds: ONE_HOUR_IN_SECONDS,
+    onForegroundExpired: onEnded,
+    onBackgroundExpired: () => {
+      const player = playerRef.current;
 
-  const clearPlaybackWindowTimeout = () => {
-    if (playbackWindowTimeout.current !== null) {
-      window.clearTimeout(playbackWindowTimeout.current);
-      playbackWindowTimeout.current = null;
-    }
-  };
+      if (player) {
+        player.muted(true);
+      }
+
+      // Hidden-tab source changes are unreliable, so surface a stopped state instead.
+      onPlaybackWindowMuted();
+    },
+  });
 
   const updatePlayingState = () => {
     if (isPlaying) {
@@ -98,14 +99,14 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
     return () => {
       const player = playerRef.current;
 
-      clearPlaybackWindowTimeout();
+      playbackWindow.reset();
 
       if (player && !player.isDisposed()) {
         player.dispose();
         playerRef.current = null;
       }
     };
-  }, []);
+  }, [playbackWindow]);
 
   const playAudio = () => {
     const player = playerRef.current;
@@ -133,14 +134,8 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
     const player = playerRef.current;
 
     if (player) {
-      clearPlaybackWindowTimeout();
-      playbackWindowId.current += 1;
+      playbackWindow.reset();
       hasConfiguredPlaybackWindow.current = false;
-      hasMutedPlaybackWindow.current = false;
-      pendingSeekStart.current = null;
-      playbackEndsAt.current = null;
-      playbackWindowRemaining.current = null;
-      playbackWindowTimerStartedAt.current = null;
       embeddedIsPlaying.current = false;
       isChangingSource.current = true;
       isLoading.current = true;
@@ -156,104 +151,24 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
       player.src(sources);
       player.currentTime(startAt);
     }
-  }, [youtubeURL, sourceVersion, startAt]);
+  }, [youtubeURL, sourceSession, startAt, playbackWindow]);
 
   useEffect(() => {
     updatePlayingState();
   }, [isPlaying]);
 
   useEffect(() => {
-    const endPlaybackWindow = (windowId: number) => {
-      const player = playerRef.current;
-
-      if (
-        !player ||
-        windowId !== playbackWindowId.current ||
-        hasMutedPlaybackWindow.current
-      ) {
-        return;
-      }
-
-      hasMutedPlaybackWindow.current = true;
-      playbackEndsAt.current = null;
-      playbackWindowRemaining.current = 0;
-      playbackWindowTimerStartedAt.current = null;
-      clearPlaybackWindowTimeout();
-
-      if (document.hidden) {
-        player.muted(true);
-        onPlaybackWindowMuted();
-      } else {
-        onEnded();
-      }
-    };
-
-    const pausePlaybackWindowTimer = () => {
-      if (playbackWindowTimeout.current === null) {
-        return;
-      }
-
-      window.clearTimeout(playbackWindowTimeout.current);
-      playbackWindowTimeout.current = null;
-
-      if (
-        playbackWindowRemaining.current !== null &&
-        playbackWindowTimerStartedAt.current !== null
-      ) {
-        const elapsedSeconds =
-          (Date.now() - playbackWindowTimerStartedAt.current) / 1000;
-        playbackWindowRemaining.current = Math.max(
-          playbackWindowRemaining.current - elapsedSeconds,
-          0
-        );
-      }
-
-      playbackWindowTimerStartedAt.current = null;
-    };
-
-    const startPlaybackWindowTimer = (windowId: number) => {
-      if (
-        windowId !== playbackWindowId.current ||
-        hasMutedPlaybackWindow.current ||
-        playbackWindowRemaining.current === null ||
-        playbackWindowTimeout.current !== null
-      ) {
-        return;
-      }
-
-      if (playbackWindowRemaining.current <= 0) {
-        endPlaybackWindow(windowId);
-        return;
-      }
-
-      playbackWindowTimerStartedAt.current = Date.now();
-      playbackWindowTimeout.current = window.setTimeout(() => {
-        playbackWindowTimeout.current = null;
-        playbackWindowTimerStartedAt.current = null;
-        playbackWindowRemaining.current = 0;
-        endPlaybackWindow(windowId);
-      }, playbackWindowRemaining.current * 1000);
-    };
-
     const applyPendingSeek = () => {
       const player = playerRef.current;
-      const targetStart = pendingSeekStart.current;
 
-      if (!player || targetStart === null) {
+      if (!player) {
         return;
       }
 
-      const currentTime = player.currentTime();
-
-      if (
-        typeof currentTime === "number" &&
-        Math.abs(currentTime - targetStart) < 2
-      ) {
-        pendingSeekStart.current = null;
-        return;
-      }
-
-      player.currentTime(targetStart);
+      playbackWindow.applyPendingSeek(
+        () => player.currentTime(),
+        (seconds) => player.currentTime(seconds)
+      );
     };
 
     const configurePlaybackWindow = () => {
@@ -273,21 +188,20 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
         return;
       }
 
-      hasConfiguredPlaybackWindow.current = true;
+      playbackWindow.configure({
+        duration,
+        seekTo: (seconds) => player.currentTime(seconds),
+        onConfigured: () => {
+          hasConfiguredPlaybackWindow.current = true;
 
-      if (duration > ONE_HOUR_IN_SECONDS) {
-        const latestStart = duration - ONE_HOUR_IN_SECONDS;
-        const randomStart = Math.random() * latestStart;
-        const windowId = playbackWindowId.current;
+          if (isPlaying && embeddedIsPlaying.current && !isLoading.current) {
+            playbackWindow.start();
+          }
+        },
+      });
 
-        pendingSeekStart.current = randomStart;
-        player.currentTime(randomStart);
-        playbackEndsAt.current = randomStart + ONE_HOUR_IN_SECONDS;
-        playbackWindowRemaining.current = ONE_HOUR_IN_SECONDS;
-
-        if (isPlaying && embeddedIsPlaying.current && !isLoading.current) {
-          startPlaybackWindowTimer(windowId);
-        }
+      if (duration <= ONE_HOUR_IN_SECONDS) {
+        hasConfiguredPlaybackWindow.current = true;
       }
     };
 
@@ -325,7 +239,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
     };
 
     const handleWaiting = () => {
-      pausePlaybackWindowTimer();
+      playbackWindow.pause();
 
       // The first waiting event seems to be erroneous; the video can already play.
       if (hasWaitedInitially.current) {
@@ -340,7 +254,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
       isChangingSource.current = false;
       isLoading.current = false;
       applyPendingSeek();
-      startPlaybackWindowTimer(playbackWindowId.current);
+      playbackWindow.start();
       onResumed();
     };
 
@@ -354,7 +268,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
         embeddedIsPlaying.current = true;
         isLoading.current = false;
         applyPendingSeek();
-        startPlaybackWindowTimer(playbackWindowId.current);
+        playbackWindow.start();
         onPlay();
       } else {
         hasReceivedPlayInitially.current = true;
@@ -364,8 +278,9 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
     const handlePause = () => {
       embeddedIsPlaying.current = false;
       isLoading.current = false;
-      pausePlaybackWindowTimer();
+      playbackWindow.pause();
 
+      // Video.js can emit pause while swapping YouTube sources; keep parent state stable.
       if (isChangingSource.current) {
         return;
       }
@@ -374,8 +289,7 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
     };
 
     const handleEnded = () => {
-      clearPlaybackWindowTimeout();
-      playbackWindowTimerStartedAt.current = null;
+      playbackWindow.reset();
       onEnded();
     };
 
@@ -385,11 +299,9 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
 
       if (
         player &&
-        playbackEndsAt.current !== null &&
-        typeof currentTime === "number" &&
-        currentTime >= playbackEndsAt.current
+        typeof currentTime === "number"
       ) {
-        endPlaybackWindow(playbackWindowId.current);
+        playbackWindow.expireIfPastEnd(currentTime);
       }
     };
 
@@ -425,7 +337,8 @@ const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = ({
     };
   }, [
     isPlaying,
-    sourceVersion,
+    sourceSession,
+    playbackWindow,
     onReady,
     onWaiting,
     onResumed,
